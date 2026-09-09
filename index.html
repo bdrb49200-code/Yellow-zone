@@ -29,6 +29,28 @@ header{position:fixed;z-index:30;top:0;left:0;right:0;height:78px;padding:0 6%;d
 footer{background:#08172e;color:#fff;text-align:center;padding:45px 7%}.flogo{font-size:24px;font-weight:900;direction:ltr}.flogo b{color:var(--yellow)}.flogo span{color:#fff}footer p{color:#8797ad;margin:8px 0 18px}.socials{display:flex;justify-content:center;gap:22px;color:#9fc4ff;font-size:13px}
 .dynamic-empty{grid-column:1/-1;text-align:center;padding:30px;color:var(--muted);border:1px dashed var(--line);border-radius:18px}.offer-card.no-image{padding:0}.offer-card.no-image .offer-body{min-height:180px}.gallery-grid .dynamic-gallery{position:relative;overflow:hidden;border-radius:22px;background:#dfeeff;min-height:220px}.gallery-grid .dynamic-gallery:first-child{grid-row:span 2}.gallery-grid .dynamic-gallery img{width:100%;height:100%;min-height:220px;object-fit:cover;display:block}.gallery-grid .dynamic-gallery:after{content:"";position:absolute;inset:45% 0 0;background:linear-gradient(transparent,#0009)}.gallery-grid .dynamic-gallery span{position:absolute;z-index:2;bottom:15px;right:18px;color:#fff;font-weight:800}.gallery-grid .dynamic-gallery:nth-child(n+6){grid-row:auto}@media(max-width:950px){nav{display:none}.hero{grid-template-columns:1fr;padding-top:115px}.hero-copy{text-align:center;margin:auto}.hero p{margin-left:auto;margin-right:auto}.actions{justify-content:center}.hero-media{max-width:650px;width:100%;margin:auto}.features{grid-template-columns:1fr 1fr}.price-grid{grid-template-columns:1fr 1fr}.split{grid-template-columns:1fr}.birthday-grid{grid-template-columns:1fr}.birthday.main{transform:none}.booking-box{grid-template-columns:1fr}.videos,.ads-grid,.offer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.req-list{padding-right:18px}.contact-cta{padding:17px}.wa-btn{width:100%}header{padding:0 18px}.hero{padding-left:20px;padding-right:20px}.hero h1{font-size:43px}.actions{flex-direction:column}.hero-media{height:370px}.f1{right:5px}.f2{left:5px}.features{grid-template-columns:1fr}.feature{border:0;border-bottom:1px solid #edf1f6}.price-grid,.offer-grid,.ads-grid,.videos{grid-template-columns:1fr}.section{padding:70px 20px}.head h2{font-size:31px}.gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:180px 180px}.g:first-child{grid-row:span 2}.booking-box{padding:25px}.modal-card{border-radius:22px}.modal-top,.modal-form{padding-left:20px;padding-right:20px}.selected-service{margin-left:20px;margin-right:20px}form{grid-template-columns:1fr}.full,.submit{grid-column:auto}.booking-preview{margin-top:15px}}
+
+.my-bookings{background:#fff}
+.booking-lookup{max-width:900px;margin:auto;background:#f6faff;border:1px solid var(--line);border-radius:24px;padding:28px}
+.lookup-form{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
+.lookup-form .btn{min-height:48px}
+.booking-result{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
+.booking-result.hidden{display:none}
+.booking-result-head{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.booking-code{font-size:24px;font-weight:900;color:var(--blue);direction:ltr}
+.booking-status{padding:6px 11px;border-radius:20px;background:#edf5ff;color:var(--blue);font-size:12px;font-weight:900}
+.booking-status.cancelled{background:#fff0f0;color:#c62828}
+.booking-details{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
+.booking-detail{background:#f7f9fc;border-radius:12px;padding:12px}
+.booking-detail small{display:block;color:var(--muted);font-size:11px}
+.booking-detail b{display:block;margin-top:3px}
+.booking-result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.booking-result-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.8}
+.edit-booking-btn{border:0;background:var(--blue);color:#fff;padding:11px 16px;border-radius:11px;font-weight:900}
+@media(max-width:600px){.lookup-form{grid-template-columns:1fr}.booking-details{grid-template-columns:1fr}.booking-lookup{padding:18px}}
+
+
+.social-float{position:fixed;z-index:60;left:18px;bottom:20px;display:flex;flex-direction:column;gap:10px}.social-float a{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#fff;color:var(--blue);border:1px solid var(--line);box-shadow:0 10px 28px #16365c22;transition:.2s}.social-float a:hover{transform:translateY(-3px);box-shadow:0 14px 32px #16365c30}.social-float svg{width:22px;height:22px;fill:currentColor}.socials{align-items:center}.socials a{display:inline-flex;align-items:center;gap:6px;color:#9fc4ff}.socials a svg{width:18px;height:18px;fill:currentColor}@media(max-width:600px){.social-float{left:12px;bottom:14px;gap:7px}.social-float a{width:42px;height:42px}}
 </style>
 </head>
 <body>
@@ -139,8 +161,9 @@ footer{background:#08172e;color:#fff;text-align:center;padding:45px 7%}.flogo{fo
   </div>
 </section>
 
-<footer><div class="flogo"><b>YELLOW</b> <span>ZONE</span></div><p data-ar="المتعة تبدأ من هنا." data-en="The fun starts here.">المتعة تبدأ من هنا.</p><div class="socials"><a target="_blank" rel="noopener" href="https://www.instagram.com/yellow.zoooon24/">Instagram</a><a target="_blank" rel="noopener" href="https://www.tiktok.com/@yellowzooone24">TikTok</a><a target="_blank" rel="noopener" href="https://www.snapchat.com/add/yellowzoooone24">Snapchat</a></div></footer>
+<footer><div class="flogo"><b>YELLOW</b> <span>ZONE</span></div><p data-ar="المتعة تبدأ من هنا." data-en="The fun starts here.">المتعة تبدأ من هنا.</p><div class="socials"><a target="_blank" rel="noopener" href="https://wa.me/966554160210" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3Z"/></svg><span>WhatsApp</span></a><a target="_blank" rel="noopener" href="https://www.instagram.com/yellow.zoooon24/" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 12 16.5 4.5 4.5 0 0 1 12 7.5Z"/></svg><span>Instagram</span></a><a target="_blank" rel="noopener" href="https://www.tiktok.com/@yellowzooone24" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M15 3c.4 2.5 1.8 4 4.3 4.2V10c-1.7-.1-3.1-.6-4.3-1.5v6.2A5.3 5.3 0 1 1 10.2 9v2.8a2.5 2.5 0 1 0 2 2.5V3H15Z"/></svg><span>TikTok</span></a><a target="_blank" rel="noopener" href="https://www.snapchat.com/add/yellowzoooone24" aria-label="Snapchat"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.1 0 5.1 2.2 5.1 5.2v2.1c.2.8.7 1.3 1.6 1.7.7.3 1.1.5 1.1 1 0 .6-.8.9-1.5 1.1-.4.1-.8.2-.9.6-.2.7-.8 1.2-1.6 1.3-.4.1-.8 0-1.2-.1-.5.8-1.4 1.5-2.6 1.9-.1 1.1.7 1.5 2.1 1.7.5.1.7.3.7.6 0 .6-1.3.8-2 .9-.4.1-.5.3-.6.7h-1.4c-.1-.4-.2-.6-.6-.7-.7-.1-2-.3-2-.9 0-.3.2-.5.7-.6 1.4-.2 2.2-.6 2.1-1.7-1.2-.4-2.1-1.1-2.6-1.9-.4.1-.8 0-1.2-.1-.8-.1-1.4-.6-1.6-1.3-.1-.4-.5-.5-.9-.6C3.9 13.1 3 12.8 3 12.2c0-.5.4-.7 1.1-1 .9-.4 1.4-.9 1.6-1.7V7.4c0-3 2-5.2 5.1-5.2h1.2Z"/></svg><span>Snapchat</span></a></div></footer>
 
+<div class="social-float" aria-label="روابط التواصل"><a target="_blank" rel="noopener" href="https://wa.me/966554160210" aria-label="WhatsApp"><svg viewBox="0 0 24 24"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3Z"/></svg></a><a target="_blank" rel="noopener" href="https://www.instagram.com/yellow.zoooon24/" aria-label="Instagram"><svg viewBox="0 0 24 24"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Z"/></svg></a><a target="_blank" rel="noopener" href="https://www.tiktok.com/@yellowzooone24" aria-label="TikTok"><svg viewBox="0 0 24 24"><path d="M15 3c.4 2.5 1.8 4 4.3 4.2V10c-1.7-.1-3.1-.6-4.3-1.5v6.2A5.3 5.3 0 1 1 10.2 9v2.8a2.5 2.5 0 1 0 2 2.5V3H15Z"/></svg></a><a target="_blank" rel="noopener" href="https://www.snapchat.com/add/yellowzoooone24" aria-label="Snapchat"><svg viewBox="0 0 24 24"><path d="M12 2.2c3.1 0 5.1 2.2 5.1 5.2v2.1c.2.8.7 1.3 1.6 1.7.7.3 1.1.5 1.1 1 0 .6-.8.9-1.5 1.1-.4.1-.8.2-.9.6-.2.7-.8 1.2-1.6 1.3-.4.1-.8 0-1.2-.1-.5.8-1.4 1.5-2.6 1.9-.1 1.1.7 1.5 2.1 1.7.5.1.7.3.7.6 0 .6-1.3.8-2 .9-.4.1-.5.3-.6.7h-1.4c-.1-.4-.2-.6-.6-.7-.7-.1-2-.3-2-.9 0-.3.2-.5.7-.6 1.4-.2 2.2-.6 2.1-1.7-1.2-.4-2.1-1.1-2.6-1.9-.4.1-.8 0-1.2-.1-.8-.1-1.4-.6-1.6-1.3-.1-.4-.5-.5-.9-.6C3.9 13.1 3 12.8 3 12.2c0-.5.4-.7 1.1-1 .9-.4 1.4-.9 1.6-1.7V7.4c0-3 2-5.2 5.1-5.2h1.2Z"/></svg></a></div>
 <div class="modal" id="bookingModal" aria-hidden="true">
   <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
     <div class="modal-top"><div><span class="label" data-ar="حجز Yellow Zone" data-en="Yellow Zone Booking">حجز Yellow Zone</span><h3 id="modalTitle" data-ar="أكمل بيانات الحجز" data-en="Complete your booking">أكمل بيانات الحجز</h3></div><button class="close" id="closeModal" type="button" aria-label="Close">×</button></div>
@@ -158,24 +181,6 @@ footer{background:#08172e;color:#fff;text-align:center;padding:45px 7%}.flogo{fo
 </div>
 <div class="toast" id="toast"></div>
 
-.my-bookings{background:#fff}
-.booking-lookup{max-width:900px;margin:auto;background:#f6faff;border:1px solid var(--line);border-radius:24px;padding:28px}
-.lookup-form{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end}
-.lookup-form .btn{min-height:48px}
-.booking-result{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px}
-.booking-result.hidden{display:none}
-.booking-result-head{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
-.booking-code{font-size:24px;font-weight:900;color:var(--blue);direction:ltr}
-.booking-status{padding:6px 11px;border-radius:20px;background:#edf5ff;color:var(--blue);font-size:12px;font-weight:900}
-.booking-status.cancelled{background:#fff0f0;color:#c62828}
-.booking-details{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:16px}
-.booking-detail{background:#f7f9fc;border-radius:12px;padding:12px}
-.booking-detail small{display:block;color:var(--muted);font-size:11px}
-.booking-detail b{display:block;margin-top:3px}
-.booking-result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.booking-result-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.8}
-.edit-booking-btn{border:0;background:var(--blue);color:#fff;padding:11px 16px;border-radius:11px;font-weight:900}
-@media(max-width:600px){.lookup-form{grid-template-columns:1fr}.booking-details{grid-template-columns:1fr}.booking-lookup{padding:18px}}
 
 <script>
 'use strict';
@@ -460,7 +465,7 @@ function renderBirthdays(){const box=document.getElementById('birthdayGrid');con
 async function loadGallery(){
  try{const r=await fetch(SUPABASE_URL+'/rest/v1/gallery?select=id,title_ar,title_en,image_url,active,sort_order&active=eq.true&order=sort_order.asc,created_at.asc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('gallery '+r.status);galleryCache=await r.json();renderGallery();}catch(e){console.error(e);renderGallery([])}
 }
-function renderGallery(){const box=document.getElementById('galleryGrid');const local=[['assets/images/gallery/gallery-01.jpg','منطقة الألعاب','Play area'],['assets/images/gallery/gallery-02.jpg','ألعاب الأطفال','Kids play'],['assets/images/gallery/gallery-03.jpg','منطقة الألعاب والمغامرات','Adventure area'],['assets/images/gallery/gallery-04.jpg','القفز والمرح','Jump & fun'],['assets/images/gallery/gallery-05.jpg','منطقة الرمل','Sand area'],['assets/images/gallery/gallery-06.jpg','منطقة الألعاب الداخلية','Indoor play']];const remote=(galleryCache||[]).map(g=>[g.image_url,g.title_ar||'Yellow Zone',g.title_en||'Yellow Zone']);const arr=[...local,...remote];box.innerHTML=arr.length?arr.map(g=>`<div class="dynamic-gallery"><img src="${escapeHTML(g[0])}" alt="${escapeHTML(currentLang==='ar'?g[1]:g[2])}"><span>${escapeHTML(currentLang==='ar'?g[1]:g[2])}</span></div>`).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد صور في المعرض حالياً.':'No gallery images are available.')+'</div>'; }" alt="${escapeHTML(currentLang==='ar'?(g.title_ar||'Yellow Zone'):(g.title_en||'Yellow Zone'))}"><span>${escapeHTML(currentLang==='ar'?(g.title_ar||'Yellow Zone'):(g.title_en||'Yellow Zone'))}</span></div>`).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد صور في المعرض حالياً.':'No gallery images are available.')+'</div>';}
+function renderGallery(){const box=document.getElementById('galleryGrid');const local=[['assets/images/gallery/gallery-01.jpg','منطقة الألعاب','Play area'],['assets/images/gallery/gallery-02.jpg','ألعاب الأطفال','Kids play'],['assets/images/gallery/gallery-03.jpg','منطقة الألعاب والمغامرات','Adventure area'],['assets/images/gallery/gallery-04.jpg','القفز والمرح','Jump & fun'],['assets/images/gallery/gallery-05.jpg','منطقة الرمل','Sand area'],['assets/images/gallery/gallery-06.jpg','منطقة الألعاب الداخلية','Indoor play']];const remote=(galleryCache||[]).map(g=>[g.image_url,g.title_ar||'Yellow Zone',g.title_en||'Yellow Zone']);const arr=[...local,...remote];box.innerHTML=arr.length?arr.map(g=>`<div class="dynamic-gallery"><img src="${escapeHTML(g[0])}" alt="${escapeHTML(currentLang==='ar'?g[1]:g[2])}"><span>${escapeHTML(currentLang==='ar'?g[1]:g[2])}</span></div>`).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد صور في المعرض حالياً.':'No gallery images are available.')+'</div>';}
 applyLanguage(currentLang);Promise.all([loadOffers(),loadAds(),loadGallery()]);
 </script>
 </body>
