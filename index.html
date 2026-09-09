@@ -451,7 +451,7 @@ async function lookupBooking(codeOverride=''){
  result.innerHTML=`<div class="booking-result-note">${currentLang==='ar'?'جاري البحث عن الحجز...':'Looking up your booking...'}</div>`;
  try{
    const data=await customerRpc('yz_customer_booking_get',{p_booking_code:code});
-   if(!data?.found){currentCustomerBooking=null;localStorage.removeItem(BOOKING_STORAGE_KEY);result.innerHTML=`<div class="error">${currentLang==='ar'?'كود الحجز غير صحيح أو غير موجود، وقد يكون الحجز قد تم إلغاؤه.':'Booking code not found. The booking may have been cancelled.'}</div>`;return}
+   if(!data?.found || !data.booking || data.booking.status==='cancelled'){currentCustomerBooking=null;localStorage.removeItem(BOOKING_STORAGE_KEY);input.value='';result.innerHTML=`<div class="error">${currentLang==='ar'?'الحجز غير موجود. قد يكون قد تم حذفه أو إلغاؤه.':'Booking not found. It may have been deleted or cancelled.'}</div>`;return}
    currentCustomerBooking=data.booking;
    localStorage.setItem(BOOKING_STORAGE_KEY,currentCustomerBooking.booking_code);
    input.value=currentCustomerBooking.booking_code;
