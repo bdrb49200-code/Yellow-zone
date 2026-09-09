@@ -52,28 +52,34 @@ footer{background:#08172e;color:#fff;text-align:center;padding:45px 7%}.flogo{fo
 
 .socials{align-items:center}.socials a{display:inline-flex;align-items:center;gap:6px;color:#9fc4ff}.socials a svg{width:18px;height:18px;fill:currentColor}
 
-/* Final social icons update */
-.header-socials{display:flex;align-items:center;gap:11px;direction:ltr}
+/* Final header social + logo */
+.brand-wrap{display:flex;align-items:center;gap:10px;direction:ltr}
+.brand-logo-circle{width:54px;height:54px;border-radius:50%;background:#fff;display:grid;place-items:center;overflow:hidden;border:2px solid #ffd400;box-shadow:0 7px 18px #16365c18;animation:logoFloat 3.2s ease-in-out infinite}
+.brand-logo-circle img{width:100%;height:100%;object-fit:cover}
+@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.header-left{display:flex;align-items:center;gap:18px;direction:ltr}
+.header-socials{display:flex;align-items:center;gap:9px;direction:ltr}
 .header-socials a{width:38px;height:38px;display:grid;place-items:center;border-radius:50%;background:#fff;border:1px solid var(--line);box-shadow:0 7px 18px #16365c12;transition:.2s}
 .header-socials a:hover{transform:translateY(-2px);box-shadow:0 10px 22px #16365c20}
 .header-socials svg{width:20px;height:20px;fill:currentColor}
 .socials a.whatsapp,.header-socials a.whatsapp{color:#25D366}
 .socials a.instagram,.header-socials a.instagram{color:#E4405F}
-.socials a.tiktok,.header-socials a.tiktok{color:#111}
+.socials a.tiktok,.header-socials a.tiktok{color:#fff}
 .socials a.snapchat,.header-socials a.snapchat{color:#FFFC00}
 .header-socials a.snapchat svg{filter:drop-shadow(0 0 0.7px #111)}
-@media(max-width:900px){header{padding:0 3%}.header-socials{gap:6px}.header-socials a{width:34px;height:34px}.header-socials svg{width:18px;height:18px}nav{gap:13px}}
-@media(max-width:700px){.header-socials{display:none}}
+@media(max-width:1050px){header{padding:0 3%}nav{gap:13px}.header-socials{gap:6px}.header-socials a{width:34px;height:34px}.header-socials svg{width:18px;height:18px}.brand-logo-circle{width:48px;height:48px}}
+@media(max-width:780px){.header-socials{display:none}.brand-logo-circle{width:46px;height:46px}.brand-wrap{gap:7px}} 
 </style>
 </head>
 <body>
 <header>
-  <div style="display:flex;align-items:center;gap:18px"><div class="logo"><b>YELLOW</b><i></i><span>ZONE</span></div><div class="header-socials" aria-label="روابط التواصل">
-<a class="whatsapp" target="_blank" rel="noopener" href="https://wa.me/966554160210" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3Z"/></svg></a>
-<a class="instagram" target="_blank" rel="noopener" href="https://www.instagram.com/yellow.zoooon24/" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 12 16.5 4.5 4.5 0 0 1 12 7.5Z"/></svg></a>
-<a class="tiktok" target="_blank" rel="noopener" href="https://www.tiktok.com/@yellowzooone24" aria-label="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3c.4 2.5 1.8 4 4.3 4.2V10c-1.7-.1-3.1-.6-4.3-1.5v6.2A5.3 5.3 0 1 1 10.2 9v2.8a2.5 2.5 0 1 0 2 2.5V3H15Z"/></svg></a>
-<a class="snapchat" target="_blank" rel="noopener" href="https://www.snapchat.com/add/yellowzoooone24" aria-label="Snapchat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.1 0 5.1 2.2 5.1 5.2v2.1c.2.8.7 1.3 1.6 1.7.7.3 1.1.5 1.1 1 0 .6-.8.9-1.5 1.1-.4.1-.8.2-.9.6-.2.7-.8 1.2-1.6 1.3-.4.1-.8 0-1.2-.1-.5.8-1.4 1.5-2.6 1.9-.1 1.1.7 1.5 2.1 1.7.5.1.7.3.7.6 0 .6-1.3.8-2 .9-.4.1-.5.3-.6.7h-1.4c-.1-.4-.2-.6-.6-.7-.7-.1-2-.3-2-.9 0-.3.2-.5.7-.6 1.4-.2 2.2-.6 2.1-1.7-1.2-.4-2.1-1.1-2.6-1.9-.4.1-.8 0-1.2-.1-.8-.1-1.4-.6-1.6-1.3-.1-.4-.5-.5-.9-.6C3.9 13.1 3 12.8 3 12.2c0-.5.4-.7 1.1-1 .9-.4 1.4-.9 1.6-1.7V7.4c0-3 2-5.2 5.1-5.2h1.2Z"/></svg></a>
-</div></div>
+  <div class="brand-wrap">
+    <div class="brand-logo-circle" aria-label="شعار Yellow Zone">
+      <img src="assets/images/yellow-zone-logo-circle.png" alt="Yellow Zone">
+    </div>
+    <div class="logo"><b>YELLOW</b><i></i><span>ZONE</span></div>
+  </div>
+
   <nav>
     <a href="#prices" data-ar="الأسعار" data-en="Prices">الأسعار</a>
     <a href="#offers" data-ar="العروض" data-en="Offers">العروض</a>
@@ -82,7 +88,16 @@ footer{background:#08172e;color:#fff;text-align:center;padding:45px 7%}.flogo{fo
     <a href="#gallery" data-ar="المعرض" data-en="Gallery">المعرض</a>
     <a href="#booking" data-ar="الحجز" data-en="Booking">الحجز</a>
   </nav>
-  <button class="lang" id="langButton" type="button">English</button>
+
+  <div class="header-left">
+    <div class="header-socials" aria-label="روابط التواصل">
+      <a class="whatsapp" target="_blank" rel="noopener" href="https://wa.me/966554160210" aria-label="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11.8 11.8 0 0 0 12.1 0C5.6 0 .3 5.3.3 11.8c0 2.1.5 4.1 1.6 5.9L.2 24l6.5-1.7a11.8 11.8 0 0 0 5.4 1.3h.1c6.5 0 11.8-5.3 11.8-11.8 0-3.2-1.2-6.1-3.5-8.3Z"/></svg></a>
+      <a class="instagram" target="_blank" rel="noopener" href="https://www.instagram.com/yellow.zoooon24/" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A4.5 4.5 0 1 1 12 16.5 4.5 4.5 0 0 1 12 7.5Z"/></svg></a>
+      <a class="tiktok" target="_blank" rel="noopener" href="https://www.tiktok.com/@yellowzooone24" aria-label="TikTok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3c.4 2.5 1.8 4 4.3 4.2V10c-1.7-.1-3.1-.6-4.3-1.5v6.2A5.3 5.3 0 1 1 10.2 9v2.8a2.5 2.5 0 1 0 2 2.5V3H15Z"/></svg></a>
+      <a class="snapchat" target="_blank" rel="noopener" href="https://www.snapchat.com/add/yellowzoooone24" aria-label="Snapchat"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.1 0 5.1 2.2 5.1 5.2v2.1c.2.8.7 1.3 1.6 1.7.7.3 1.1.5 1.1 1 0 .6-.8.9-1.5 1.1-.4.1-.8.2-.9.6-.2.7-.8 1.2-1.6 1.3-.4.1-.8 0-1.2-.1-.5.8-1.4 1.5-2.6 1.9-.1 1.1.7 1.5 2.1 1.7.5.1.7.3.7.6 0 .6-1.3.8-2 .9-.4.1-.5.3-.6.7h-1.4c-.1-.4-.2-.6-.6-.7-.7-.1-2-.3-2-.9 0-.3.2-.5.7-.6 1.4-.2 2.2-.6 2.1-1.7-1.2-.4-2.1-1.1-2.6-1.9-.4.1-.8 0-1.2-.1-.8-.1-1.4-.6-1.6-1.3-.1-.4-.5-.5-.9-.6C3.9 13.1 3 12.8 3 12.2c0-.5.4-.7 1.1-1 .9-.4 1.4-.9 1.6-1.7V7.4c0-3 2-5.2 5.1-5.2h1.2Z"/></svg></a>
+    </div>
+    <button class="lang" id="langButton" type="button">English</button>
+  </div>
 </header>
 
 <main>
@@ -460,7 +475,7 @@ function adTitle(ad){return escapeHTML(currentLang==='ar'?(ad.title_ar||ad.title
 function adBody(ad){return escapeHTML(currentLang==='ar'?(ad.body_ar||ad.text||''):(ad.body_en||ad.text||''))}
 function renderAds(){
  const grid=document.getElementById('adsGrid');const empty=document.getElementById('emptyAds');grid.innerHTML='';
- if(!window.activeAds||!window.activeAds.length){empty.style.display='block';return} empty.style.display='none';
+ if(!window.activeAds||!window.activeAds.length){empty.style.display='none';return} empty.style.display='none';
  window.activeAds.forEach(ad=>{const event=isEventAd(ad);const key=event?'event-'+ad.id:'';if(event)dynamicEvents[key]={ar:ad.title_ar||ad.title||'فعالية',en:ad.title_en||ad.title||'Event',price:ad.price?String(ad.price)+' SAR':''};const img=ad.image_url?`<img src="${escapeHTML(ad.image_url)}" alt="${adTitle(ad)}">`:'';const card=document.createElement('article');card.className='ad-card';card.innerHTML=`${img}<div class="ad-body"><h3>${adTitle(ad)}</h3><p>${adBody(ad)}</p><div class="ad-meta">${event?`<span class="event-badge">${currentLang==='ar'?'قابل للحجز':'Bookable Event'}</span><button type="button" data-event-key="${escapeHTML(key)}">${currentLang==='ar'?(String(ad.title_ar||ad.title||'الفعالية').includes('حف')?'احجز الحفلة':'احجز الفعالية'):'Book Event'}</button>`:''}</div></div>`;if(event)card.querySelector('button').addEventListener('click',()=>openBooking(key));grid.appendChild(card)})
 }
 async function loadAds(){
