@@ -264,6 +264,35 @@ let offersCache=[];
 let galleryCache=[];
 let editingBookingCode=null;
 let editingBookingOriginalCreatedAt=null;
+const translationCache=JSON.parse(localStorage.getItem('yellow-zone-translation-cache')||'{}');
+async function translateText(text){
+ text=String(text||'').trim(); if(!text)return '';
+ if(/^[\x00-\x7F]*$/.test(text)) return text;
+ if(translationCache[text]) return translationCache[text];
+ try{
+  const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(text)+'&langpair=ar|en');
+  const j=await r.json(); const out=j?.responseData?.translatedText;
+  if(out){translationCache[text]=out;localStorage.setItem('yellow-zone-translation-cache',JSON.stringify(translationCache));return out;}
+ }catch(e){}
+ return text;
+}
+async function translateDynamicContent(){
+ if(currentLang!=='en') return;
+ const jobs=[];
+ for(const o of offersCache){
+  if(o.name_ar)jobs.push(translateText(o.name_ar).then(v=>o._enName=v));
+  if(o.description_ar)jobs.push(translateText(o.description_ar).then(v=>o._enDesc=v));
+ }
+ for(const a of window.activeAds||[]){
+  if(a.title_ar||a.title)jobs.push(translateText(a.title_ar||a.title).then(v=>a._enTitle=v));
+  if(a.body_ar||a.text)jobs.push(translateText(a.body_ar||a.text).then(v=>a._enBody=v));
+ }
+ for(const g of galleryCache||[]){
+  if(g.title_ar)jobs.push(translateText(g.title_ar).then(v=>g._enTitle=v));
+ }
+ await Promise.all(jobs);
+ renderGeneralPrices();renderOffers();renderTrips();renderBirthdays();renderAds();renderGallery();
+}
 const services={};
 const staticFallback={
  open:{ar:'وقت مفتوح',en:'Open Time',price:'75 SAR'},
@@ -304,7 +333,7 @@ function applyLanguage(language){
  renderServiceOptions();
  if(modal.classList.contains('show')) updateSelectedService();
  if(offersCache.length){renderGeneralPrices();renderOffers();renderTrips();renderBirthdays();}
- renderAds();renderGallery();if(currentCustomerBooking){document.getElementById('bookingResult').innerHTML=bookingResultHTML(currentCustomerBooking);}
+ renderAds();renderGallery();if(language==='en')translateDynamicContent();if(currentCustomerBooking){document.getElementById('bookingResult').innerHTML=bookingResultHTML(currentCustomerBooking);}
 }
 function toggleLang(){applyLanguage(currentLang==='ar'?'en':'ar')}
 langButton.addEventListener('click',toggleLang);
@@ -504,14 +533,14 @@ document.getElementById('lookupBooking').addEventListener('click',()=>lookupBook
 
 function isEventAd(ad){const text=((ad.title_ar||ad.title||'')+' '+(ad.body_ar||ad.text||'')+' '+(ad.title_en||'')+' '+(ad.body_en||'')).toLowerCase();return /فعالية|حفلة|حفل|event|party|activity/.test(text)}
 function escapeHTML(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-function adTitle(ad){return escapeHTML(currentLang==='ar'?(ad.title_ar||ad.title||'Yellow Zone'):(ad.title_en||ad.title||'Yellow Zone'))}
-function adBody(ad){return escapeHTML(currentLang==='ar'?(ad.body_ar||ad.text||''):(ad.body_en||ad.text||''))}
+function adTitle(ad){return escapeHTML(currentLang==='ar'?(ad.title_ar||ad.title||'Yellow Zone'):(ad._enTitle||ad.title_en||ad.title||ad.title_ar||'Yellow Zone'))}
+function adBody(ad){return escapeHTML(currentLang==='ar'?(ad.body_ar||ad.text||''):(ad._enBody||ad.body_en||ad.text||ad.body_ar||''))}
 function renderAds(){
  const grid=document.getElementById('adsGrid');const empty=document.getElementById('emptyAds');grid.innerHTML='';dynamicEvents={};
  if(!window.activeAds||!window.activeAds.length){empty.style.display='none';return} empty.style.display='none';
  window.activeAds.forEach(ad=>{
   const event=isEventAd(ad);const bookable=ad.bookable===true;const key='ad-'+ad.id;
-  if(bookable)dynamicEvents[key]={ar:ad.title_ar||ad.title||'فعالية',en:ad.title_en||ad.title||'Event',price:ad.price?money(ad.price)+' '+(currentLang==='ar'?'ريال':'SAR'):'',rawPrice:ad.price??null,bookable:true};
+  if(bookable)dynamicEvents[key]={ar:ad.title_ar||ad.title||'فعالية',en:ad._enTitle||ad.title_en||ad.title||ad.title_ar||'Event',price:ad.price?money(ad.price)+' '+(currentLang==='ar'?'ريال':'SAR'):'',rawPrice:ad.price??null,bookable:true};
   const img=ad.image_url?`<img src="${escapeHTML(ad.image_url)}" alt="${adTitle(ad)}">`:'';
   const price=Number(ad.price)>0?`<span class="ad-price">${money(ad.price)} ${currentLang==='ar'?'ريال':'SAR'}</span>`:'';
   const button=bookable?`<button type="button" data-ad-book="${escapeHTML(key)}">${currentLang==='ar'?(event?(String(ad.title_ar||ad.title||'').includes('حف')?'احجز الحفلة':'احجز الفعالية'):'احجز الآن'):'Book Now'}</button>`:'';
@@ -522,10 +551,10 @@ function renderAds(){
  })
 }
 async function loadAds(){
- try{const r=await fetch(SUPABASE_URL+'/rest/v1/ads?select=id,title,text,image_url,active,title_ar,title_en,body_ar,body_en,target_url,sort_order,bookable,price&active=eq.true&order=sort_order.asc,created_at.desc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('ads '+r.status);window.activeAds=await r.json();renderAds()}catch(e){console.error(e);window.activeAds=[];renderAds()}
+ try{const r=await fetch(SUPABASE_URL+'/rest/v1/ads?select=id,title,text,image_url,active,title_ar,title_en,body_ar,body_en,target_url,sort_order,bookable,price&active=eq.true&order=sort_order.asc,created_at.desc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('ads '+r.status);window.activeAds=await r.json();renderAds();if(currentLang==='en')translateDynamicContent()}catch(e){console.error(e);window.activeAds=[];renderAds()}
 }
 async function loadOffers(){
- try{const r=await fetch(SUPABASE_URL+'/rest/v1/offers?select=id,name_ar,name_en,description_ar,description_en,price,active,booking_enabled,category,sort_order,image_url&active=eq.true&order=sort_order.asc,id.asc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('offers '+r.status);offersCache=await r.json();applyOffersToSite();}catch(e){console.error(e);offersCache=[];applyOffersToSite();toast(currentLang==='ar'?'تعذر تحميل الأسعار حالياً.':'Could not load prices right now.','error')}}
+ try{const r=await fetch(SUPABASE_URL+'/rest/v1/offers?select=id,name_ar,name_en,description_ar,description_en,price,active,booking_enabled,category,sort_order,image_url&active=eq.true&order=sort_order.asc,id.asc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('offers '+r.status);offersCache=await r.json();applyOffersToSite();if(currentLang==='en')translateDynamicContent();}catch(e){console.error(e);offersCache=[];applyOffersToSite();toast(currentLang==='ar'?'تعذر تحميل الأسعار حالياً.':'Could not load prices right now.','error')}}
 function applyOffersToSite(){
  Object.keys(services).forEach(k=>delete services[k]);
  const bySlug={}; offersCache.forEach(o=>{const key=slugForOffer(o);const item={id:o.id,ar:o.name_ar||o.name_en||'',en:o.name_en||o.name_ar||'',price:money(o.price)+' SAR',rawPrice:o.price,description_ar:o.description_ar||'',description_en:o.description_en||'',category:o.category||'',bookable:o.booking_enabled!==false}; if(!bySlug[key])bySlug[key]=item; else if(Number(o.sort_order)<Number(bySlug[key].sort_order||999))bySlug[key]=item; services[key]=item;});
@@ -533,14 +562,14 @@ function applyOffersToSite(){
  renderGeneralPrices();renderOffers();renderTrips();renderBirthdays();renderServiceOptions();updateSelectedService();renderAds();
 }
 function priceText(o){const n=money(o.price);return o.category==='trips'?n+' '+(currentLang==='ar'?'ريال للطفل':'SAR per child'):n+' '+(currentLang==='ar'?'ريال':'SAR')}
-function renderGeneralPrices(){const box=document.getElementById('generalPrices');const arr=offersCache.filter(o=>o.category==='general');box.innerHTML=arr.length?arr.map((o,i)=>{const key=slugForOffer(o);return `<div class="card ${i===1?'featured':''}"><div class="icon">${offerIcon(o.category)}</div><h3>${escapeHTML(currentLang==='ar'?o.name_ar:o.name_en)}</h3><div class="price">${money(o.price)} <small>${currentLang==='ar'?'ريال':'SAR'}</small></div><p>${escapeHTML(currentLang==='ar'?(o.description_ar||''): (o.description_en||''))}</p>${o.booking_enabled!==false?`<button type="button" data-book="${escapeHTML(key)}">${currentLang==='ar'?'احجز الآن':'Book Now'}</button>`:''}</div>`}).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد أسعار متاحة حالياً.':'No prices are currently available.')+'</div>';box.querySelectorAll('[data-book]').forEach(b=>b.addEventListener('click',()=>openBooking(b.dataset.book)));}
-function renderOffers(){const box=document.getElementById('offersGrid');const arr=offersCache;box.innerHTML=arr.length?arr.map((o,i)=>{const key=slugForOffer(o);const cat=o.category==='birthdays'?(currentLang==='ar'?'أعياد الميلاد':'Birthdays'):o.category==='trips'?(currentLang==='ar'?'للمجموعات':'For Groups'):(currentLang==='ar'?'لعب ومرح':'Play & Fun');return `<article class="offer-card no-image ${i===1?'featured-offer':''}"><div class="offer-body"><span>${cat}</span><h3>${escapeHTML(currentLang==='ar'?o.name_ar:o.name_en)}</h3><strong>${priceText(o)}</strong><p>${escapeHTML(currentLang==='ar'?(o.description_ar||''):(o.description_en||''))}</p>${o.booking_enabled!==false?`<button type="button" data-book="${escapeHTML(key)}">${currentLang==='ar'?'احجز الآن':'Book Now'}</button>`:''}</div></article>`}).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد باقات متاحة حالياً.':'No packages are currently available.')+'</div>';box.querySelectorAll('[data-book]').forEach(b=>b.addEventListener('click',()=>openBooking(b.dataset.book)));}
+function renderGeneralPrices(){const box=document.getElementById('generalPrices');const arr=offersCache.filter(o=>o.category==='general');box.innerHTML=arr.length?arr.map((o,i)=>{const key=slugForOffer(o);return `<div class="card ${i===1?'featured':''}"><div class="icon">${offerIcon(o.category)}</div><h3>${escapeHTML(currentLang==='ar'?o.name_ar:(o._enName||o.name_en||o.name_ar))}</h3><div class="price">${money(o.price)} <small>${currentLang==='ar'?'ريال':'SAR'}</small></div><p>${escapeHTML(currentLang==='ar'?(o.description_ar||''): (o._enDesc||o.description_en||o.description_ar||''))}</p>${o.booking_enabled!==false?`<button type="button" data-book="${escapeHTML(key)}">${currentLang==='ar'?'احجز الآن':'Book Now'}</button>`:''}</div>`}).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد أسعار متاحة حالياً.':'No prices are currently available.')+'</div>';box.querySelectorAll('[data-book]').forEach(b=>b.addEventListener('click',()=>openBooking(b.dataset.book)));}
+function renderOffers(){const box=document.getElementById('offersGrid');const arr=offersCache;box.innerHTML=arr.length?arr.map((o,i)=>{const key=slugForOffer(o);const cat=o.category==='birthdays'?(currentLang==='ar'?'أعياد الميلاد':'Birthdays'):o.category==='trips'?(currentLang==='ar'?'للمجموعات':'For Groups'):(currentLang==='ar'?'لعب ومرح':'Play & Fun');return `<article class="offer-card no-image ${i===1?'featured-offer':''}"><div class="offer-body"><span>${cat}</span><h3>${escapeHTML(currentLang==='ar'?o.name_ar:(o._enName||o.name_en||o.name_ar))}</h3><strong>${priceText(o)}</strong><p>${escapeHTML(currentLang==='ar'?(o.description_ar||''):(o._enDesc||o.description_en||o.description_ar||''))}</p>${o.booking_enabled!==false?`<button type="button" data-book="${escapeHTML(key)}">${currentLang==='ar'?'احجز الآن':'Book Now'}</button>`:''}</div></article>`}).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد باقات متاحة حالياً.':'No packages are currently available.')+'</div>';box.querySelectorAll('[data-book]').forEach(b=>b.addEventListener('click',()=>openBooking(b.dataset.book)));}
 function renderTrips(){const o=offersCache.find(x=>x.category==='trips'&&x.active);if(!o)return;document.getElementById('tripPrice').innerHTML=priceText(o).replace('ريال للطفل','<small>ريال للطفل</small>').replace('SAR per child','<small>SAR per child</small>');}
-function renderBirthdays(){const box=document.getElementById('birthdayGrid');const arr=offersCache.filter(o=>o.category==='birthdays');box.innerHTML=arr.length?arr.map((o,i)=>{const key=slugForOffer(o);const name=currentLang==='ar'?o.name_ar:o.name_en;return `<div class="birthday ${i===1?'main':''} ${!String(name).match(/10|15|10 Kids|15 Kids/i)?'extras':''}"><div class="kids">${String(name).match(/10|15/)?.[0]||'+'}</div><h3>${escapeHTML(name)}</h3><div class="birthday-price">${priceText(o)}</div><p>${escapeHTML(currentLang==='ar'?(o.description_ar||''):(o.description_en||''))}</p>${o.booking_enabled!==false?`<button type="button" onclick="openBooking('${escapeHTML(key)}')">${currentLang==='ar'?'احجز الباقة':'Book Package'}</button>`:''}</div>`}).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد باقات أعياد ميلاد متاحة حالياً.':'No birthday packages are currently available.')+'</div>';}
+function renderBirthdays(){const box=document.getElementById('birthdayGrid');const arr=offersCache.filter(o=>o.category==='birthdays');box.innerHTML=arr.length?arr.map((o,i)=>{const key=slugForOffer(o);const name=currentLang==='ar'?o.name_ar:(o._enName||o.name_en||o.name_ar);return `<div class="birthday ${i===1?'main':''} ${!String(name).match(/10|15|10 Kids|15 Kids/i)?'extras':''}"><div class="kids">${String(name).match(/10|15/)?.[0]||'+'}</div><h3>${escapeHTML(name)}</h3><div class="birthday-price">${priceText(o)}</div><p>${escapeHTML(currentLang==='ar'?(o.description_ar||''):(o._enDesc||o.description_en||o.description_ar||''))}</p>${o.booking_enabled!==false?`<button type="button" onclick="openBooking('${escapeHTML(key)}')">${currentLang==='ar'?'احجز الباقة':'Book Package'}</button>`:''}</div>`}).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد باقات أعياد ميلاد متاحة حالياً.':'No birthday packages are currently available.')+'</div>';}
 async function loadGallery(){
- try{const r=await fetch(SUPABASE_URL+'/rest/v1/gallery?select=id,title_ar,title_en,image_url,active,sort_order&active=eq.true&order=sort_order.asc,created_at.asc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('gallery '+r.status);galleryCache=await r.json();renderGallery();}catch(e){console.error(e);renderGallery([])}
+ try{const r=await fetch(SUPABASE_URL+'/rest/v1/gallery?select=id,title_ar,title_en,image_url,active,sort_order&active=eq.true&order=sort_order.asc,created_at.asc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('gallery '+r.status);galleryCache=await r.json();renderGallery();if(currentLang==='en')translateDynamicContent();}catch(e){console.error(e);renderGallery([])}
 }
-function renderGallery(){const box=document.getElementById('galleryGrid');const local=[['assets/images/gallery/gallery-01.jpg','منطقة الألعاب','Play area'],['assets/images/gallery/gallery-02.jpg','ألعاب الأطفال','Kids play'],['assets/images/gallery/gallery-03.jpg','منطقة الألعاب والمغامرات','Adventure area'],['assets/images/gallery/gallery-04.jpg','القفز والمرح','Jump & fun'],['assets/images/gallery/gallery-05.jpg','منطقة الرمل','Sand area'],['assets/images/gallery/gallery-06.jpg','منطقة الألعاب الداخلية','Indoor play']];const remote=(galleryCache||[]).map(g=>[g.image_url,g.title_ar||'Yellow Zone',g.title_en||'Yellow Zone']);const arr=[...local,...remote];box.innerHTML=arr.length?arr.map(g=>`<div class="dynamic-gallery"><img src="${escapeHTML(g[0])}" alt="${escapeHTML(currentLang==='ar'?g[1]:g[2])}"><span>${escapeHTML(currentLang==='ar'?g[1]:g[2])}</span></div>`).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد صور في المعرض حالياً.':'No gallery images are available.')+'</div>';}
+function renderGallery(){const box=document.getElementById('galleryGrid');const local=[['assets/images/gallery/gallery-01.jpg','منطقة الألعاب','Play area'],['assets/images/gallery/gallery-02.jpg','ألعاب الأطفال','Kids play'],['assets/images/gallery/gallery-03.jpg','منطقة الألعاب والمغامرات','Adventure area'],['assets/images/gallery/gallery-04.jpg','القفز والمرح','Jump & fun'],['assets/images/gallery/gallery-05.jpg','منطقة الرمل','Sand area'],['assets/images/gallery/gallery-06.jpg','منطقة الألعاب الداخلية','Indoor play']];const remote=(galleryCache||[]).map(g=>[g.image_url,g.title_ar||'Yellow Zone',g._enTitle||g.title_en||g.title_ar||'Yellow Zone']);const arr=[...local,...remote];box.innerHTML=arr.length?arr.map(g=>`<div class="dynamic-gallery"><img src="${escapeHTML(g[0])}" alt="${escapeHTML(currentLang==='ar'?g[1]:g[2])}"><span>${escapeHTML(currentLang==='ar'?g[1]:g[2])}</span></div>`).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد صور في المعرض حالياً.':'No gallery images are available.')+'</div>';}
 applyLanguage(currentLang);Promise.all([loadOffers(),loadAds(),loadGallery()]);
 
 let selectedRating=5;
