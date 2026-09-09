@@ -295,7 +295,7 @@ function authorizeServiceOptions(){renderServiceOptions()}
 function renderServiceOptions(){
  const all={...services,...dynamicEvents};
  serviceSelect.innerHTML='';
- Object.keys(all).forEach(key=>{const sv=all[key];const o=document.createElement('option');o.value=key;o.textContent=sv[currentLang]||sv.ar||sv.en;o.dataset.dynamic=dynamicEvents[key]?'1':'0';serviceSelect.appendChild(o)});
+ Object.keys(all).forEach(key=>{const sv=all[key];if(sv.bookable===false&&!editingBookingCode)return;const o=document.createElement('option');o.value=key;o.textContent=sv[currentLang]||sv.ar||sv.en;o.dataset.dynamic=dynamicEvents[key]?'1':'0';serviceSelect.appendChild(o)});
  if(!all[selectedKey]) selectedKey=Object.keys(all)[0]||'open';
  serviceSelect.value=selectedKey;
 }
@@ -310,7 +310,7 @@ function openBooking(key='open', custom={}){
  selectedKey=key;
  renderServiceOptions();
  if(custom.title){
-   dynamicEvents[key]={ar:custom.title,en:custom.title,price:custom.price||''};
+   dynamicEvents[key]={ar:custom.title,en:custom.title,price:custom.price||'',rawPrice:custom.rawPrice??null,bookable:true};
    renderServiceOptions();
  }
  serviceSelect.value=selectedKey;updateSelectedService();
@@ -378,7 +378,7 @@ form.addEventListener('submit',async e=>{
        p_guests:guests,
        p_offer_id:offer?.id||null,
        p_offer_name_snapshot:service,
-       p_price_snapshot:offer?.price??null,
+       p_price_snapshot:offer?.price??dynamicEvents[selectedKey]?.rawPrice??null,
        p_service_type:service,
        p_notes:notes
      });
@@ -488,18 +488,28 @@ function escapeHTML(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','
 function adTitle(ad){return escapeHTML(currentLang==='ar'?(ad.title_ar||ad.title||'Yellow Zone'):(ad.title_en||ad.title||'Yellow Zone'))}
 function adBody(ad){return escapeHTML(currentLang==='ar'?(ad.body_ar||ad.text||''):(ad.body_en||ad.text||''))}
 function renderAds(){
- const grid=document.getElementById('adsGrid');const empty=document.getElementById('emptyAds');grid.innerHTML='';
+ const grid=document.getElementById('adsGrid');const empty=document.getElementById('emptyAds');grid.innerHTML='';dynamicEvents={};
  if(!window.activeAds||!window.activeAds.length){empty.style.display='none';return} empty.style.display='none';
- window.activeAds.forEach(ad=>{const event=isEventAd(ad);const key=event?'event-'+ad.id:'';if(event)dynamicEvents[key]={ar:ad.title_ar||ad.title||'فعالية',en:ad.title_en||ad.title||'Event',price:ad.price?String(ad.price)+' SAR':''};const img=ad.image_url?`<img src="${escapeHTML(ad.image_url)}" alt="${adTitle(ad)}">`:'';const card=document.createElement('article');card.className='ad-card';card.innerHTML=`${img}<div class="ad-body"><h3>${adTitle(ad)}</h3><p>${adBody(ad)}</p><div class="ad-meta">${event?`<span class="event-badge">${currentLang==='ar'?'قابل للحجز':'Bookable Event'}</span><button type="button" data-event-key="${escapeHTML(key)}">${currentLang==='ar'?(String(ad.title_ar||ad.title||'الفعالية').includes('حف')?'احجز الحفلة':'احجز الفعالية'):'Book Event'}</button>`:''}</div></div>`;if(event)card.querySelector('button').addEventListener('click',()=>openBooking(key));grid.appendChild(card)})
+ window.activeAds.forEach(ad=>{
+  const event=isEventAd(ad);const bookable=ad.bookable===true;const key='ad-'+ad.id;
+  if(bookable)dynamicEvents[key]={ar:ad.title_ar||ad.title||'فعالية',en:ad.title_en||ad.title||'Event',price:ad.price?money(ad.price)+' '+(currentLang==='ar'?'ريال':'SAR'):'',rawPrice:ad.price??null,bookable:true};
+  const img=ad.image_url?`<img src="${escapeHTML(ad.image_url)}" alt="${adTitle(ad)}">`:'';
+  const price=Number(ad.price)>0?`<span class="ad-price">${money(ad.price)} ${currentLang==='ar'?'ريال':'SAR'}</span>`:'';
+  const button=bookable?`<button type="button" data-ad-book="${escapeHTML(key)}">${currentLang==='ar'?(event?(String(ad.title_ar||ad.title||'').includes('حف')?'احجز الحفلة':'احجز الفعالية'):'احجز الآن'):'Book Now'}</button>`:'';
+  const badge=bookable?`<span class="event-badge">${currentLang==='ar'?'قابل للحجز':'Bookable'}</span>`:'';
+  const card=document.createElement('article');card.className='ad-card';card.innerHTML=`${img}<div class="ad-body"><h3>${adTitle(ad)}</h3><p>${adBody(ad)}</p><div class="ad-meta">${price}${badge}${button}</div></div>`;
+  if(bookable)card.querySelector('[data-ad-book]').addEventListener('click',()=>openBooking(key));
+  grid.appendChild(card)
+ })
 }
 async function loadAds(){
- try{const r=await fetch(SUPABASE_URL+'/rest/v1/ads?select=id,title,text,image_url,active,title_ar,title_en,body_ar,body_en,target_url,sort_order&active=eq.true&order=sort_order.asc,created_at.desc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('ads '+r.status);window.activeAds=await r.json();renderAds()}catch(e){console.error(e);window.activeAds=[];renderAds()}
+ try{const r=await fetch(SUPABASE_URL+'/rest/v1/ads?select=id,title,text,image_url,active,title_ar,title_en,body_ar,body_en,target_url,sort_order,bookable,price&active=eq.true&order=sort_order.asc,created_at.desc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('ads '+r.status);window.activeAds=await r.json();renderAds()}catch(e){console.error(e);window.activeAds=[];renderAds()}
 }
 async function loadOffers(){
  try{const r=await fetch(SUPABASE_URL+'/rest/v1/offers?select=id,name_ar,name_en,description_ar,description_en,price,active,booking_enabled,category,sort_order,image_url&active=eq.true&order=sort_order.asc,id.asc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('offers '+r.status);offersCache=await r.json();applyOffersToSite();}catch(e){console.error(e);offersCache=[];applyOffersToSite();toast(currentLang==='ar'?'تعذر تحميل الأسعار حالياً.':'Could not load prices right now.','error')}}
 function applyOffersToSite(){
  Object.keys(services).forEach(k=>delete services[k]);
- const bySlug={}; offersCache.forEach(o=>{const key=slugForOffer(o);const item={id:o.id,ar:o.name_ar||o.name_en||'',en:o.name_en||o.name_ar||'',price:money(o.price)+' SAR',rawPrice:o.price,description_ar:o.description_ar||'',description_en:o.description_en||'',category:o.category||''}; if(!bySlug[key])bySlug[key]=item; else if(Number(o.sort_order)<Number(bySlug[key].sort_order||999))bySlug[key]=item; services[key]=item;});
+ const bySlug={}; offersCache.forEach(o=>{const key=slugForOffer(o);const item={id:o.id,ar:o.name_ar||o.name_en||'',en:o.name_en||o.name_ar||'',price:money(o.price)+' SAR',rawPrice:o.price,description_ar:o.description_ar||'',description_en:o.description_en||'',category:o.category||'',bookable:o.booking_enabled!==false}; if(!bySlug[key])bySlug[key]=item; else if(Number(o.sort_order)<Number(bySlug[key].sort_order||999))bySlug[key]=item; services[key]=item;});
  if(!Object.keys(services).length)Object.assign(services,staticFallback);
  renderGeneralPrices();renderOffers();renderTrips();renderBirthdays();renderServiceOptions();updateSelectedService();renderAds();
 }
