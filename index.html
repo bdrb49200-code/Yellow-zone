@@ -431,6 +431,7 @@ form.addEventListener('submit',async e=>{
        p_notes:notes
      });
      if(!result?.ok)throw new Error(result?.message||'update failed');
+     saveBookingCode(result.booking?.booking_code||editingBookingCode);
      toast(currentLang==='ar'?'تم تعديل الحجز بنجاح.':'Your booking was updated successfully.','success');
      editingBookingCode=null;
      editingBookingOriginalCreatedAt=null;
@@ -443,6 +444,7 @@ form.addEventListener('submit',async e=>{
      setTimeout(()=>lookupBooking(result.booking?.booking_code||''),850);
    }else{
      const bookingCode=makeBookingCode();
+     saveBookingCode(bookingCode);
      const data={booking_code:bookingCode,customer_name:name,customer_phone:phone,booking_date:date,guests,offer_id:offer?.id||null,price_snapshot:offer?.price??null,offer_name_snapshot:service,service_type:service,notes,status:'new'};
      await sendBooking(data);
      toast(currentLang==='ar'?'تم إرسال طلب الحجز بنجاح. سيتم التواصل معك لتأكيد الحجز.':'Your booking request was sent successfully. We will contact you to confirm it.','success');
@@ -485,18 +487,23 @@ function bookingResultHTML(b){
  </div>
  <div class="booking-result-note">${currentLang==='ar'?'تاريخ إنشاء الطلب يظل محفوظًا كما هو. تعديل البيانات لا يغيّر تاريخ إنشاء الحجز.':'The original creation date is preserved. Editing does not change when the booking was created.'}</div>`;
 }
+const BOOKING_STORAGE_KEY='yellow-zone-last-booking-code';
 let currentCustomerBooking=null;
-async function lookupBooking(codeOverride=''){
+function saveBookingCode(code){try{if(code)localStorage.setItem(BOOKING_STORAGE_KEY,String(code).trim().toUpperCase());}catch(e){console.warn('booking storage unavailable',e)}}
+function clearSavedBookingCode(){try{localStorage.removeItem(BOOKING_STORAGE_KEY)}catch(e){}}
+async function restoreSavedBooking(){try{const code=(localStorage.getItem(BOOKING_STORAGE_KEY)||'').trim().toUpperCase();if(!code)return;const input=document.getElementById('lookupCode');if(input)input.value=code;await lookupBooking(code,true)}catch(e){console.warn('restore booking failed',e)}}
+async function lookupBooking(codeOverride='',silent=false){
  const input=document.getElementById('lookupCode');
  const code=(codeOverride||input.value||'').trim().toUpperCase();
  const result=document.getElementById('bookingResult');
- if(!code){result.classList.remove('hidden');result.innerHTML=`<div class="error">${currentLang==='ar'?'اكتب كود الحجز أولاً.':'Enter your booking code first.'}</div>`;return}
+ if(!code){if(!silent){result.classList.remove('hidden');result.innerHTML=`<div class="error">${currentLang==='ar'?'اكتب كود الحجز أولاً.':'Enter your booking code first.'}</div>`}return}
  result.classList.remove('hidden');
- result.innerHTML=`<div class="booking-result-note">${currentLang==='ar'?'جاري البحث عن الحجز...':'Looking up your booking...'}</div>`;
+ if(!silent) result.innerHTML=`<div class="booking-result-note">${currentLang==='ar'?'جاري البحث عن الحجز...':'Looking up your booking...'}</div>`;
  try{
    const data=await customerRpc('yz_customer_booking_get',{p_booking_code:code});
-   if(!data?.found){currentCustomerBooking=null;result.innerHTML=`<div class="error">${currentLang==='ar'?'كود الحجز غير صحيح أو غير موجود، وقد يكون الحجز قد تم إلغاؤه.':'Booking code not found. The booking may have been cancelled.'}</div>`;return}
+   if(!data?.found){currentCustomerBooking=null;clearSavedBookingCode();result.innerHTML=`<div class="error">${currentLang==='ar'?'كود الحجز غير صحيح أو غير موجود، وقد يكون الحجز قد تم إلغاؤه.':'Booking code not found. The booking may have been cancelled.'}</div>`;return}
    currentCustomerBooking=data.booking;
+   saveBookingCode(currentCustomerBooking.booking_code);
    input.value=currentCustomerBooking.booking_code;
    result.innerHTML=bookingResultHTML(currentCustomerBooking);
  }catch(e){
@@ -570,7 +577,7 @@ async function loadGallery(){
  try{const r=await fetch(SUPABASE_URL+'/rest/v1/gallery?select=id,title_ar,title_en,image_url,active,sort_order&active=eq.true&order=sort_order.asc,created_at.asc',{headers:{apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY}});if(!r.ok)throw new Error('gallery '+r.status);galleryCache=await r.json();renderGallery();if(currentLang==='en')translateDynamicContent();}catch(e){console.error(e);renderGallery([])}
 }
 function renderGallery(){const box=document.getElementById('galleryGrid');const local=[['assets/images/gallery/gallery-01.jpg','منطقة الألعاب','Play area'],['assets/images/gallery/gallery-02.jpg','ألعاب الأطفال','Kids play'],['assets/images/gallery/gallery-03.jpg','منطقة الألعاب والمغامرات','Adventure area'],['assets/images/gallery/gallery-04.jpg','القفز والمرح','Jump & fun'],['assets/images/gallery/gallery-05.jpg','منطقة الرمل','Sand area'],['assets/images/gallery/gallery-06.jpg','منطقة الألعاب الداخلية','Indoor play']];const remote=(galleryCache||[]).map(g=>[g.image_url,g.title_ar||'Yellow Zone',g._enTitle||g.title_en||g.title_ar||'Yellow Zone']);const arr=[...local,...remote];box.innerHTML=arr.length?arr.map(g=>`<div class="dynamic-gallery"><img src="${escapeHTML(g[0])}" alt="${escapeHTML(currentLang==='ar'?g[1]:g[2])}"><span>${escapeHTML(currentLang==='ar'?g[1]:g[2])}</span></div>`).join(''):'<div class="dynamic-empty">'+(currentLang==='ar'?'لا توجد صور في المعرض حالياً.':'No gallery images are available.')+'</div>';}
-applyLanguage(currentLang);Promise.all([loadOffers(),loadAds(),loadGallery()]);
+applyLanguage(currentLang);Promise.all([loadOffers(),loadAds(),loadGallery()]).then(()=>restoreSavedBooking());
 
 let selectedRating=5;
 function initRatingPicker(){const box=document.getElementById('ratingPicker');if(!box)return;box.innerHTML=[5,4,3,2,1].map(n=>`<button type="button" data-rating="${n}" aria-label="${n} نجوم">★</button>`).join('');box.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{selectedRating=Number(b.dataset.rating);updateRatingPicker()}));updateRatingPicker()}
