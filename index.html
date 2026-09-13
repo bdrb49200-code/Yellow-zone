@@ -147,6 +147,46 @@ footer{background:#08172e;color:#fff;text-align:center;padding:45px 7%}.flogo{fo
   .lang{padding:4px 6px;font-size:9px}
 }
 
+/* Mobile gallery + header socials final fix */
+@media (max-width: 600px){
+  header{overflow:visible!important}
+  .header-socials{display:flex!important;visibility:visible!important;opacity:1!important}
+  .gallery-grid{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-rows:none!important;
+    grid-auto-rows:auto!important;
+    gap:14px!important;
+  }
+  .gallery-grid .dynamic-gallery,
+  .gallery-grid .dynamic-gallery:first-child{
+    grid-column:auto!important;
+    grid-row:auto!important;
+    width:100%!important;
+    height:260px!important;
+    min-height:260px!important;
+    margin:0!important;
+  }
+  .gallery-grid .dynamic-gallery img{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    display:block!important;
+    object-fit:cover!important;
+  }
+}
+@media (max-width: 420px){
+  header{padding:0 7px!important;gap:4px!important}
+  .brand-wrap{gap:4px!important}
+  .brand-logo-circle{width:32px!important;height:32px!important;flex-basis:32px!important}
+  .logo{font-size:12px!important}
+  .header-left{gap:4px!important}
+  .header-socials{gap:2px!important}
+  .header-socials a{width:23px!important;height:23px!important}
+  .header-socials a img{width:15px!important;height:15px!important}
+  .lang{font-size:9px!important;padding:4px 5px!important}
+}
+
 </style>
 </head>
 <body>
