@@ -35,3 +35,9 @@ input:focus,select:focus{border-color:#5676ff;box-shadow:0 0 0 3px rgba(86,118,2
   .print-text span{font-family:monospace;font-size:9pt;direction:ltr}
   .print-text small{font-size:8pt}
 }
+
+.demo-accounts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0 18px}
+.demo-accounts>div{border:1px solid #dfe5ee;background:#f8faff;border-radius:12px;padding:10px 12px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.demo-accounts strong{direction:ltr}
+.demo-accounts span{font-family:monospace;direction:ltr;color:#556176;font-size:12px}
+@media(max-width:580px){.demo-accounts{grid-template-columns:1fr}}

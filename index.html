@@ -18,20 +18,27 @@
 
     <section id="authView" class="panel auth-panel">
       <h2>تسجيل دخول الموظف</h2>
-      <p class="muted">استخدم حساب Supabase. لو أول مرة، أنشئ حسابًا ثم أكّد البريد لو طُلب منك.</p>
+      <p class="muted">نسخة تجريبية — ادخل باسم المستخدم وكلمة المرور.</p>
+
+      <div class="demo-accounts">
+        <div><strong>badr</strong><span>Badr1234</span></div>
+        <div><strong>alaa</strong><span>Alaa1234</span></div>
+        <div><strong>eman</strong><span>Eman1234</span></div>
+      </div>
+
       <div class="grid two">
         <label>
-          البريد الإلكتروني
-          <input id="email" type="email" placeholder="name@example.com" autocomplete="email" />
+          اسم المستخدم
+          <input id="username" type="text" placeholder="badr" autocomplete="username" />
         </label>
         <label>
           كلمة المرور
-          <input id="password" type="password" placeholder="8 أحرف أو أكثر" autocomplete="current-password" />
+          <input id="password" type="password" placeholder="كلمة المرور" autocomplete="current-password" />
         </label>
       </div>
+
       <div class="actions">
         <button id="loginBtn" class="btn primary">دخول</button>
-        <button id="signupBtn" class="btn secondary">إنشاء حساب تجريبي</button>
       </div>
       <div id="authMsg" class="notice hidden"></div>
     </section>

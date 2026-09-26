@@ -3,6 +3,30 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_N3BSrFZfEidi-nN8hYbWFg_WbjMMsDn
 const TABLE = "center_play_sessions_demo";
 
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+/*
+  حسابات التجربة.
+  مهم: هذه الطريقة مناسبة للتجربة فقط لأن كلمات المرور موجودة داخل كود الموقع.
+  في النسخة النهائية سنستخدم حسابات موظفين حقيقية وصلاحيات منفصلة.
+*/
+const DEMO_USERS = {
+  badr: {
+    email: "badr.yellowzone.demo@example.com",
+    password: "Badr1234",
+    displayName: "بدر"
+  },
+  alaa: {
+    email: "alaa.yellowzone.demo@example.com",
+    password: "Alaa1234",
+    displayName: "آلاء"
+  },
+  eman: {
+    email: "eman.yellowzone.demo@example.com",
+    password: "Eman1234",
+    displayName: "إيمان"
+  }
+};
+
 let sessionsCache = [];
 let printableSession = null;
 
@@ -41,33 +65,91 @@ async function refreshAuthUI(){
   $("authView").classList.toggle("hidden", logged);
   $("appView").classList.toggle("hidden", !logged);
   $("logoutBtn").classList.toggle("hidden", !logged);
-  if(logged) await loadSessions();
+
+  if(logged){
+    const username = localStorage.getItem("demoUsername") || "";
+    const user = DEMO_USERS[username];
+    if(user){
+      $("logoutBtn").textContent = `خروج — ${user.displayName}`;
+    }else{
+      $("logoutBtn").textContent = "تسجيل الخروج";
+    }
+    await loadSessions();
+  }
+}
+
+async function ensureDemoAccount(user){
+  // جرّب الدخول أولًا.
+  let result = await db.auth.signInWithPassword({
+    email: user.email,
+    password: user.password
+  });
+
+  if(!result.error) return {ok:true};
+
+  // لو الحساب غير موجود، أنشئه تلقائيًا لأول مرة.
+  const created = await db.auth.signUp({
+    email: user.email,
+    password: user.password
+  });
+
+  if(created.error){
+    return {ok:false, message:created.error.message};
+  }
+
+  if(created.data?.session){
+    return {ok:true};
+  }
+
+  // احتياطًا لو المشروع يطلب تأكيد البريد.
+  return {
+    ok:false,
+    message:"تم إنشاء الحساب لكن Supabase يطلب تأكيد البريد. عطّل Email Confirmation للتجربة أو استخدم حسابًا موجودًا."
+  };
 }
 
 $("loginBtn").onclick = async () => {
-  const email=$("email").value.trim(), password=$("password").value;
-  if(!email || !password) return showNotice("authMsg","اكتب البريد وكلمة المرور.",true);
-  const {error}=await db.auth.signInWithPassword({email,password});
-  if(error) return showNotice("authMsg",error.message,true);
+  const username = $("username").value.trim().toLowerCase();
+  const password = $("password").value;
+  const user = DEMO_USERS[username];
+
+  if(!user){
+    return showNotice("authMsg","اسم المستخدم غير صحيح. استخدم badr أو alaa أو eman.",true);
+  }
+
+  if(password !== user.password){
+    return showNotice("authMsg","كلمة المرور غير صحيحة.",true);
+  }
+
+  $("loginBtn").disabled = true;
+  $("loginBtn").textContent = "جاري الدخول...";
+
+  const result = await ensureDemoAccount(user);
+
+  $("loginBtn").disabled = false;
+  $("loginBtn").textContent = "دخول";
+
+  if(!result.ok){
+    return showNotice("authMsg","تعذر الدخول: "+result.message,true);
+  }
+
+  localStorage.setItem("demoUsername",username);
   showNotice("authMsg","تم تسجيل الدخول.");
   await refreshAuthUI();
 };
 
-$("signupBtn").onclick = async () => {
-  const email=$("email").value.trim(), password=$("password").value;
-  if(!email || password.length<8) return showNotice("authMsg","اكتب بريدًا صحيحًا وكلمة مرور 8 أحرف على الأقل.",true);
-  const {data,error}=await db.auth.signUp({email,password});
-  if(error) return showNotice("authMsg",error.message,true);
-  if(data.session){
-    showNotice("authMsg","تم إنشاء الحساب وتسجيل الدخول.");
-    await refreshAuthUI();
-  }else{
-    showNotice("authMsg","تم إنشاء الحساب. افتح رسالة التأكيد في بريدك ثم سجل الدخول.");
-  }
-};
+$("password").addEventListener("keydown",(e)=>{
+  if(e.key==="Enter") $("loginBtn").click();
+});
+$("username").addEventListener("keydown",(e)=>{
+  if(e.key==="Enter") $("password").focus();
+});
 
 $("logoutBtn").onclick = async () => {
   await db.auth.signOut();
+  localStorage.removeItem("demoUsername");
+  $("username").value="";
+  $("password").value="";
   await refreshAuthUI();
 };
 
