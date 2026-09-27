@@ -135,3 +135,19 @@ input:focus,select:focus{border-color:#5676ff;box-shadow:0 0 0 3px rgba(86,118,2
   .stats-grid{grid-template-columns:1fr 1fr}
   .stat-card strong{font-size:18px}
 }
+
+.title-row{display:flex;align-items:center;gap:10px;justify-content:flex-start}
+.version-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:38px;
+  height:25px;
+  padding:0 9px;
+  border-radius:999px;
+  background:#111827;
+  color:#fff;
+  font-weight:800;
+  font-size:12px;
+  direction:ltr;
+}

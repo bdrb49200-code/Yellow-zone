@@ -1,3 +1,4 @@
+const BUILD_VERSION = "V5-LOCAL-LOGIN-CACHEFIX";
 const SUPABASE_URL = "https://wmqjlbrgdjgfjwopekup.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_N3BSrFZfEidi-nN8hYbWFg_WbjMMsDn";
 const TABLE = "center_play_sessions_demo";
@@ -97,7 +98,7 @@ $("loginBtn").onclick = async () => {
 
   localStorage.setItem("demoUsername",username);
   localStorage.setItem("demoLoggedIn","1");
-  showNotice("authMsg","تم تسجيل الدخول.");
+  showNotice("authMsg","تم تسجيل الدخول — V5.");
   await refreshAuthUI();
 };
 
