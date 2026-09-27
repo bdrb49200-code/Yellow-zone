@@ -5,23 +5,21 @@ const TABLE = "center_play_sessions_demo";
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 /*
-  حسابات التجربة.
-  مهم: هذه الطريقة مناسبة للتجربة فقط لأن كلمات المرور موجودة داخل كود الموقع.
-  في النسخة النهائية سنستخدم حسابات موظفين حقيقية وصلاحيات منفصلة.
+  حسابات التجربة فقط.
+  تسجيل الدخول هنا محلي داخل المتصفح، وكلمات المرور ظاهرة في كود الموقع.
+  قاعدة بيانات جدول التجربة متاحة للمفتاح العام كي تعمل النسخة بدون Supabase Auth.
+  لا تستخدم هذا الأسلوب في النسخة النهائية.
 */
 const DEMO_USERS = {
   badr: {
-    email: "badr.yellowzone.demo@example.com",
     password: "Badr1234",
     displayName: "بدر"
   },
   alaa: {
-    email: "alaa.yellowzone.demo@example.com",
     password: "Alaa1234",
     displayName: "آلاء"
   },
   eman: {
-    email: "eman.yellowzone.demo@example.com",
     password: "Eman1234",
     displayName: "إيمان"
   }
@@ -69,53 +67,19 @@ function remainingInfo(row){
 }
 
 async function refreshAuthUI(){
-  const {data:{session}} = await db.auth.getSession();
-  const logged = !!session;
+  const username = localStorage.getItem("demoUsername") || "";
+  const logged = localStorage.getItem("demoLoggedIn") === "1" && !!DEMO_USERS[username];
+
   $("authView").classList.toggle("hidden", logged);
   $("appView").classList.toggle("hidden", !logged);
   $("logoutBtn").classList.toggle("hidden", !logged);
 
   if(logged){
-    const username = localStorage.getItem("demoUsername") || "";
     const user = DEMO_USERS[username];
-    if(user){
-      $("logoutBtn").textContent = `خروج — ${user.displayName}`;
-    }else{
-      $("logoutBtn").textContent = "تسجيل الخروج";
-    }
+    $("logoutBtn").textContent = `خروج — ${user.displayName}`;
     await loadSessions();
     await loadMonthlyHistory();
   }
-}
-
-async function ensureDemoAccount(user){
-  // جرّب الدخول أولًا.
-  let result = await db.auth.signInWithPassword({
-    email: user.email,
-    password: user.password
-  });
-
-  if(!result.error) return {ok:true};
-
-  // لو الحساب غير موجود، أنشئه تلقائيًا لأول مرة.
-  const created = await db.auth.signUp({
-    email: user.email,
-    password: user.password
-  });
-
-  if(created.error){
-    return {ok:false, message:created.error.message};
-  }
-
-  if(created.data?.session){
-    return {ok:true};
-  }
-
-  // احتياطًا لو المشروع يطلب تأكيد البريد.
-  return {
-    ok:false,
-    message:"تم إنشاء الحساب لكن Supabase يطلب تأكيد البريد. عطّل Email Confirmation للتجربة أو استخدم حسابًا موجودًا."
-  };
 }
 
 $("loginBtn").onclick = async () => {
@@ -131,19 +95,8 @@ $("loginBtn").onclick = async () => {
     return showNotice("authMsg","كلمة المرور غير صحيحة.",true);
   }
 
-  $("loginBtn").disabled = true;
-  $("loginBtn").textContent = "جاري الدخول...";
-
-  const result = await ensureDemoAccount(user);
-
-  $("loginBtn").disabled = false;
-  $("loginBtn").textContent = "دخول";
-
-  if(!result.ok){
-    return showNotice("authMsg","تعذر الدخول: "+result.message,true);
-  }
-
   localStorage.setItem("demoUsername",username);
+  localStorage.setItem("demoLoggedIn","1");
   showNotice("authMsg","تم تسجيل الدخول.");
   await refreshAuthUI();
 };
@@ -151,13 +104,14 @@ $("loginBtn").onclick = async () => {
 $("password").addEventListener("keydown",(e)=>{
   if(e.key==="Enter") $("loginBtn").click();
 });
+
 $("username").addEventListener("keydown",(e)=>{
   if(e.key==="Enter") $("password").focus();
 });
 
 $("logoutBtn").onclick = async () => {
-  await db.auth.signOut();
   localStorage.removeItem("demoUsername");
+  localStorage.removeItem("demoLoggedIn");
   $("username").value="";
   $("password").value="";
   await refreshAuthUI();
@@ -424,7 +378,7 @@ $("scannerInput").addEventListener("keydown",async(e)=>{
   e.target.value="";
   if(error || !data){
     const el=$("scanResult"); el.classList.remove("hidden"); el.classList.add("red");
-    el.textContent="الكود غير موجود أو لا يخص هذا الحساب.";
+    el.textContent="الكود غير موجود في قاعدة البيانات.";
     return;
   }
   showScanResult(data);
@@ -438,5 +392,4 @@ setInterval(()=>{
   if(document.activeElement===$("scannerInput")) $("scannerInput").value=currentCode;
 },1000);
 
-db.auth.onAuthStateChange(()=>setTimeout(refreshAuthUI,0));
 refreshAuthUI();
