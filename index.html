@@ -11,7 +11,7 @@
     <header class="topbar">
       <div>
         <h1>نظام دخول الأطفال</h1>
-        <p>QR + طباعة + متابعة الوقت + واتساب</p>
+        <p>QR + طباعة + متابعة الوقت + واتساب + سجل شهري</p>
       </div>
       <button id="logoutBtn" class="btn ghost hidden">تسجيل الخروج</button>
     </header>
@@ -125,12 +125,73 @@
         <div class="section-head">
           <div>
             <h2>الأطفال المسجلون</h2>
-            <p class="muted">الأخضر = الوقت ساري. الأحمر = باقي 10 دقائق أو انتهى.</p>
+            <p class="muted">الأخضر = الوقت ساري، الأصفر = باقي 10 دقائق أو أقل، الأحمر = الوقت انتهى.</p>
           </div>
           <button id="refreshBtn" class="btn ghost">تحديث</button>
         </div>
         <div id="sessions" class="cards"></div>
       </section>
+
+      <section id="historyPanel" class="panel">
+        <div class="section-head history-head">
+          <div>
+            <h2>السجل الشهري</h2>
+            <p class="muted">راجع تسجيلات الأطفال حسب الشهر وابحث بالاسم أو رقم الجوال أو كود QR.</p>
+          </div>
+
+          <div class="history-controls">
+            <label>
+              الشهر
+              <input id="historyMonth" type="month" />
+            </label>
+            <label>
+              بحث
+              <input id="historySearch" type="search" placeholder="اسم الطفل أو رقم الجوال" />
+            </label>
+            <button id="historyRefreshBtn" class="btn ghost history-refresh" type="button">تحديث السجل</button>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span>عدد التسجيلات</span>
+            <strong id="historyCount">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>إجمالي وقت اللعب</span>
+            <strong id="historyMinutes">0 دقيقة</strong>
+          </div>
+          <div class="stat-card">
+            <span>انتهت أوقاتها</span>
+            <strong id="historyExpired">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>ما زالت فعالة</span>
+            <strong id="historyActive">0</strong>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>الطفل</th>
+                <th>ولي الأمر</th>
+                <th>الجوال</th>
+                <th>المدة</th>
+                <th>الدخول</th>
+                <th>الانتهاء</th>
+                <th>الحالة</th>
+                <th>إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+        <div id="historyEmpty" class="empty-state hidden">لا توجد تسجيلات في هذا الشهر.</div>
+      </section>
+
     </main>
   </div>
 

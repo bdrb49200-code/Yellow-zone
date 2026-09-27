@@ -49,14 +49,23 @@ function normalizePhone(raw){
 
 function remainingInfo(row){
   const ms = new Date(row.ends_at).getTime() - Date.now();
-  if(ms <= 0) return {red:true,label:"انتهى الوقت",text:"00:00"};
+
+  if(ms <= 0){
+    return {state:"red",label:"انتهى الوقت",text:"00:00"};
+  }
+
   const totalSec = Math.floor(ms/1000);
   const h = Math.floor(totalSec/3600);
   const m = Math.floor((totalSec%3600)/60);
   const s = totalSec%60;
-  const text = (h ? `${String(h).padStart(2,"0")}:` : "") + `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-  const red = ms <= 10*60*1000;
-  return {red,label:red ? "قرب يخلص" : "ساري",text};
+  const text = (h ? `${String(h).padStart(2,"0")}:` : "") +
+    `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+
+  if(ms <= 10*60*1000){
+    return {state:"yellow",label:"قرب يخلص",text};
+  }
+
+  return {state:"green",label:"ساري",text};
 }
 
 async function refreshAuthUI(){
@@ -75,6 +84,7 @@ async function refreshAuthUI(){
       $("logoutBtn").textContent = "تسجيل الخروج";
     }
     await loadSessions();
+    await loadMonthlyHistory();
   }
 }
 
@@ -180,6 +190,7 @@ $("childForm").addEventListener("submit", async (e)=>{
   $("duration").value="60";
   setPrintable(data,true);
   await loadSessions();
+  await loadMonthlyHistory();
 });
 
 function renderQr(targetId, code, size=118){
@@ -229,7 +240,7 @@ function renderSessions(){
   }
   wrap.innerHTML=sessionsCache.map(r=>{
     const info=remainingInfo(r);
-    return `<article class="card ${info.red?'red':''}" data-id="${r.id}">
+    return `<article class="card ${info.state}" data-id="${r.id}">
       <div class="card-head">
         <div>
           <div class="child">${esc(r.child_name)}</div>
@@ -268,8 +279,8 @@ async function loadSessions(){
 function showScanResult(row){
   const info=remainingInfo(row);
   const el=$("scanResult");
-  el.classList.remove("hidden","red");
-  if(info.red) el.classList.add("red");
+  el.classList.remove("hidden","red","yellow","green");
+  el.classList.add(info.state);
   el.innerHTML=`<div class="scan-title">${esc(row.child_name)}</div>
     <div>الحالة: <strong>${info.label}</strong></div>
     <div>المتبقي: <strong dir="ltr">${info.text}</strong></div>
@@ -280,6 +291,129 @@ function showScanResult(row){
   $("scanPhone").onclick=()=>openWelcome(row);
   $("scanPrint").onclick=()=>printRow(row);
 }
+
+
+function monthBounds(monthValue){
+  const [year,month] = monthValue.split("-").map(Number);
+  const from = new Date(year, month-1, 1, 0, 0, 0, 0);
+  const to = new Date(year, month, 1, 0, 0, 0, 0);
+  return {from:from.toISOString(), to:to.toISOString()};
+}
+
+function formatDateTime(value){
+  return new Intl.DateTimeFormat("ar-SA",{
+    year:"numeric",
+    month:"2-digit",
+    day:"2-digit",
+    hour:"numeric",
+    minute:"2-digit"
+  }).format(new Date(value));
+}
+
+function minutesLabel(value){
+  const n = Number(value || 0);
+  if(n < 60) return `${n} دقيقة`;
+  const h = Math.floor(n/60);
+  const m = n % 60;
+  return m ? `${h} ساعة و${m} دقيقة` : `${h} ساعة`;
+}
+
+function historyState(row){
+  return remainingInfo(row);
+}
+
+let monthlyHistoryCache = [];
+
+function renderMonthlyHistory(){
+  const q = $("historySearch").value.trim().toLowerCase();
+
+  const rows = monthlyHistoryCache.filter(r=>{
+    if(!q) return true;
+    return [
+      r.child_name || "",
+      r.guardian_name || "",
+      r.guardian_phone || "",
+      r.qr_code || ""
+    ].some(v=>String(v).toLowerCase().includes(q));
+  });
+
+  $("historyCount").textContent = rows.length;
+  $("historyMinutes").textContent = minutesLabel(
+    rows.reduce((sum,r)=>sum + Number(r.duration_minutes || 0),0)
+  );
+  $("historyExpired").textContent =
+    rows.filter(r=>new Date(r.ends_at).getTime() <= Date.now()).length;
+  $("historyActive").textContent =
+    rows.filter(r=>new Date(r.ends_at).getTime() > Date.now()).length;
+
+  const body = $("historyBody");
+  const empty = $("historyEmpty");
+
+  if(!rows.length){
+    body.innerHTML = "";
+    empty.classList.remove("hidden");
+    return;
+  }
+
+  empty.classList.add("hidden");
+
+  body.innerHTML = rows.map(r=>{
+    const st = historyState(r);
+    return `<tr>
+      <td>${esc(formatDateTime(r.created_at))}</td>
+      <td><strong>${esc(r.child_name)}</strong></td>
+      <td>${esc(r.guardian_name || "—")}</td>
+      <td dir="ltr">${esc(r.guardian_phone)}</td>
+      <td>${esc(minutesLabel(r.duration_minutes))}</td>
+      <td>${esc(fmt(r.starts_at))}</td>
+      <td>${esc(fmt(r.ends_at))}</td>
+      <td><span class="history-status ${st.state}">${esc(st.label)}</span></td>
+      <td>
+        <button class="btn ghost small" type="button" data-history-open="${r.id}">عرض</button>
+      </td>
+    </tr>`;
+  }).join("");
+
+  body.querySelectorAll("[data-history-open]").forEach(btn=>{
+    btn.onclick = ()=>{
+      const row = monthlyHistoryCache.find(r=>r.id===btn.dataset.historyOpen);
+      if(!row) return;
+      showScanResult(row);
+      $("scanResult").scrollIntoView({behavior:"smooth",block:"center"});
+    };
+  });
+}
+
+async function loadMonthlyHistory(){
+  const month = $("historyMonth").value;
+  if(!month) return;
+
+  const {from,to} = monthBounds(month);
+
+  const {data,error} = await db.from(TABLE)
+    .select("*")
+    .gte("created_at",from)
+    .lt("created_at",to)
+    .order("created_at",{ascending:false});
+
+  if(error){
+    $("historyBody").innerHTML =
+      `<tr><td colspan="9"><div class="notice error">خطأ في تحميل السجل: ${esc(error.message)}</div></td></tr>`;
+    return;
+  }
+
+  monthlyHistoryCache = data || [];
+  renderMonthlyHistory();
+}
+
+const historyNow = new Date();
+$("historyMonth").value =
+  `${historyNow.getFullYear()}-${String(historyNow.getMonth()+1).padStart(2,"0")}`;
+
+$("historyMonth").addEventListener("change",loadMonthlyHistory);
+$("historySearch").addEventListener("input",renderMonthlyHistory);
+$("historyRefreshBtn").onclick = loadMonthlyHistory;
+
 
 $("scannerInput").addEventListener("keydown",async(e)=>{
   if(e.key!=="Enter") return;
@@ -296,7 +430,7 @@ $("scannerInput").addEventListener("keydown",async(e)=>{
   showScanResult(data);
 });
 
-$("refreshBtn").onclick=loadSessions;
+$("refreshBtn").onclick=async()=>{ await loadSessions(); await loadMonthlyHistory(); };
 
 setInterval(()=>{
   if(sessionsCache.length) renderSessions();
